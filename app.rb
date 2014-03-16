@@ -59,6 +59,18 @@ get '/:leaderboard/rank/:rank' do
   lb.member_at(params[:rank].to_i).to_json
 end
 
+get '/:leaderboard/rank_range' do
+  content_type :json
+  lb = Leaderboard.new(params[:leaderboard], DEFAULT_OPTIONS, settings.redis_options)
+  lb.members_from_rank_range(params[:start].to_i, params[:end].to_i).to_json
+end
+
+get '/:leaderboard/rank_members' do
+  content_type :json
+  lb = Leaderboard.new(params[:leaderboard], DEFAULT_OPTIONS, settings.redis_options)
+  lb.ranked_in_list(params[:members].split(',')).to_json
+end
+
 get '/:leaderboard/:handle' do
   content_type :json
   lb = Leaderboard.new(params[:leaderboard], DEFAULT_OPTIONS, settings.redis_options)
