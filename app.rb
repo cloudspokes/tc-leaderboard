@@ -88,6 +88,7 @@ get '/:leaderboard/:handle/around' do
 end
 
 put '/:leaderboard' do
+  content_type :json
   lb = Leaderboard.new(params[:leaderboard], DEFAULT_OPTIONS, settings.redis_options)
   lb.rank_member(params[:handle], params[:score])
   {:handle => params[:handle], 
