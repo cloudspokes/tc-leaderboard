@@ -35,6 +35,16 @@ get '/:leaderboard' do
   leaders.to_json
 end
 
+post '/:leaderboard' do
+  lb = Leaderboard.new(params[:leaderboard], DEFAULT_OPTIONS, settings.redis_options)
+  if ENV['APIKEY'].eql?(params[:apikey])
+    lb.rank_member(params[:handle], params[:score], JSON.generate({'pic' => params[:pic]}))
+    {:status => "success", :message => "Added/Updated #{params[:handle]} with a score of #{params[:score]}"}.to_json
+  else
+    {:status => "error", :message => "API Key did not match. Score not recorded."}.to_json
+  end
+end
+
 get '/:leaderboard/about' do
   content_type :json
   lb = Leaderboard.new(params[:leaderboard], DEFAULT_OPTIONS, settings.redis_options)
@@ -44,7 +54,6 @@ get '/:leaderboard/about' do
     }.to_json
 end
 
-# temp
 get '/:leaderboard/form' do
   erb :form
 end
