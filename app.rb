@@ -29,7 +29,10 @@ get '/:leaderboard' do
   content_type :json
   page = params[:page] || 1
   lb = Leaderboard.new(params[:leaderboard], DEFAULT_OPTIONS, settings.redis_options)
-  lb.leaders(page).to_json
+  leaders = lb.leaders(page)
+  # add in any additional data
+  leaders.each { |member| add_member_data(lb, member) }
+  leaders.to_json
 end
 
 get '/:leaderboard/about' do
@@ -49,42 +52,52 @@ end
 # temp
 post '/:leaderboard/form' do
   lb = Leaderboard.new(params[:leaderboard], DEFAULT_OPTIONS, settings.redis_options)
-  lb.rank_member(params[:handle], params[:score])
-  "Added/Updated #{params[:handle]} with a score of #{params[:score]}"
+  if ENV['APIKEY'].eql?(params[:apikey])
+    lb.rank_member(params[:handle], params[:score], JSON.generate({'pic' => params[:pic]}))
+    {:status => "success", :message => "Added/Updated #{params[:handle]} with a score of #{params[:score]}"}.to_json
+  else
+    {:status => "error", :message => "API Key did not match. Score not recorded."}.to_json
+  end
 end
 
 get '/:leaderboard/rank/:rank' do
   content_type :json
   lb = Leaderboard.new(params[:leaderboard], DEFAULT_OPTIONS, settings.redis_options)
-  lb.member_at(params[:rank].to_i).to_json
+  add_member_data(lb, lb.member_at(params[:rank].to_i)).to_json
 end
 
 get '/:leaderboard/rank_range' do
   content_type :json
   lb = Leaderboard.new(params[:leaderboard], DEFAULT_OPTIONS, settings.redis_options)
-  lb.members_from_rank_range(params[:start].to_i, params[:end].to_i).to_json
+  leaders = lb.members_from_rank_range(params[:start].to_i, params[:end].to_i)
+  leaders.each { |member| add_member_data(lb, member) }
+  leaders.to_json
 end
 
 get '/:leaderboard/rank_members' do
   content_type :json
   lb = Leaderboard.new(params[:leaderboard], DEFAULT_OPTIONS, settings.redis_options)
-  lb.ranked_in_list(params[:members].split(',')).to_json
+  leaders = lb.ranked_in_list(params[:members].split(','))
+  leaders.each { |member| add_member_data(lb, member) }
+  leaders.to_json  
 end
 
 get '/:leaderboard/:handle' do
   content_type :json
   lb = Leaderboard.new(params[:leaderboard], DEFAULT_OPTIONS, settings.redis_options)
-  {:handle => params[:handle], 
+  member = {:handle => params[:handle], 
     :rank => lb.rank_for(params[:handle]),
     :score => lb.score_for(params[:handle])
-    }.to_json
+    }
+  add_member_data(lb, member).to_json
 end
 
 get '/:leaderboard/:handle/around' do
   content_type :json
-  p 'around'
   lb = Leaderboard.new(params[:leaderboard], DEFAULT_OPTIONS, settings.redis_options)
-  lb.around_me(params[:handle]).to_json
+  leaders = lb.around_me(params[:handle])
+  leaders.each { |member| add_member_data(lb, member) }
+  leaders.to_json    
 end
 
 put '/:leaderboard' do
@@ -99,4 +112,15 @@ end
 
 not_found do
   halt 404, 'page not found'
+end
+
+# add any additional member data (ie pic)
+def add_member_data(lb, member)
+  begin
+    obj = JSON.parse(lb.member_data_for(member[:handle]))
+    obj.each { |key, value| member[key] = value }
+  rescue 
+    # fail silently if no data exists
+  end
+  member
 end
