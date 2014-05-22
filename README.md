@@ -52,7 +52,9 @@ Returns a leaderboard for a member which pulls members above and below the speci
 
 ## Adding or updating the scores for a member
 
-To add/update scores you will need to pass an API Key. Contact jeff@appirio.com for the key. When you POST scores to a leaderboard, if the member does not exist as a member in the leaderboard it will add them. If they already exists, it will update their score. Each time a score is added/update it will recalculate all of the rankings (thanks redis!!).
+To add/update scores you will need to pass an API Key. Contact jeff@appirio.com for the key. 
+
+When you POST scores to a leaderboard, if the member does not exist as a member in the leaderboard it will add them. If they already exists, it will add the score score you POSTed to their current score. So, if jeffdonthemic has a current score of 500 and you POST 100, the resulting score will be 600 for jeffdonthemic. Each time a score is added/update it will recalculate all of the rankings (thanks redis!!).
 
     curl -v -X POST -d handle=jeffdonthemic -d score=80 -d pic=http://community.topcoder.com/i/m/jeffdonthemic.jpeg -d apikey=[API-KEY] http://tc-leaderboard.herokuapp.com/demo    
     

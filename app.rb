@@ -25,6 +25,7 @@ get '/' do
   'Welcome to the topcoder leaderboards. Choose a leaderboard to get started.'
 end 
 
+# return a specific leaderboard with scores
 get '/:leaderboard' do
   content_type :json
   page = params[:page] || 1
@@ -35,16 +36,21 @@ get '/:leaderboard' do
   leaders.to_json
 end
 
+# adds/updates a member's score for the specified leaderboard
 post '/:leaderboard' do
   lb = Leaderboard.new(params[:leaderboard], DEFAULT_OPTIONS, settings.redis_options)
   if ENV['APIKEY'].eql?(params[:apikey])
-    lb.rank_member(params[:handle], params[:score], JSON.generate({'pic' => params[:pic]}))
-    {:status => "success", :message => "Added/Updated #{params[:handle]} with a score of #{params[:score]}"}.to_json
+    score = params[:score].to_i
+    # if they already exist, add their new score to their current
+    score = score + lb.score_for(params[:handle]).to_i if lb.score_for(params[:handle])
+    lb.rank_member(params[:handle], score, JSON.generate({'pic' => params[:pic]}))
+    {:status => "success", :message => "Added/Updated #{params[:handle]} to a score of #{score}"}.to_json
   else
     {:status => "error", :message => "API Key did not match. Score not recorded."}.to_json
   end
 end
 
+# get some basic info about a leaderboard
 get '/:leaderboard/about' do
   content_type :json
   lb = Leaderboard.new(params[:leaderboard], DEFAULT_OPTIONS, settings.redis_options)
@@ -54,27 +60,33 @@ get '/:leaderboard/about' do
     }.to_json
 end
 
+# shows a form to manually enter a member's score
 get '/:leaderboard/form' do
   erb :form
 end
 
-# temp
+# temp -- adds/updates a member's score for the specified leaderboard
 post '/:leaderboard/form' do
   lb = Leaderboard.new(params[:leaderboard], DEFAULT_OPTIONS, settings.redis_options)
   if ENV['APIKEY'].eql?(params[:apikey])
-    lb.rank_member(params[:handle], params[:score], JSON.generate({'pic' => params[:pic]}))
-    {:status => "success", :message => "Added/Updated #{params[:handle]} with a score of #{params[:score]}"}.to_json
+    score = params[:score].to_i
+    # if they already exist, add their new score to their current
+    score = score + lb.score_for(params[:handle]).to_i if lb.score_for(params[:handle])
+    lb.rank_member(params[:handle], score, JSON.generate({'pic' => params[:pic]}))
+    {:status => "success", :message => "Added/Updated #{params[:handle]} to a score of #{score}"}.to_json
   else
     {:status => "error", :message => "API Key did not match. Score not recorded."}.to_json
   end
 end
 
+# gets a the member in a specific rank for a leaderboard
 get '/:leaderboard/rank/:rank' do
   content_type :json
   lb = Leaderboard.new(params[:leaderboard], DEFAULT_OPTIONS, settings.redis_options)
   add_member_data(lb, lb.member_at(params[:rank].to_i)).to_json
 end
 
+# gets a range of ranks for a leaderboard
 get '/:leaderboard/rank_range' do
   content_type :json
   lb = Leaderboard.new(params[:leaderboard], DEFAULT_OPTIONS, settings.redis_options)
@@ -83,6 +95,7 @@ get '/:leaderboard/rank_range' do
   leaders.to_json
 end
 
+# returns members and their ranks from comma separated list of member
 get '/:leaderboard/rank_members' do
   content_type :json
   lb = Leaderboard.new(params[:leaderboard], DEFAULT_OPTIONS, settings.redis_options)
@@ -91,6 +104,7 @@ get '/:leaderboard/rank_members' do
   leaders.to_json  
 end
 
+# gets a member's rank
 get '/:leaderboard/:handle' do
   content_type :json
   lb = Leaderboard.new(params[:leaderboard], DEFAULT_OPTIONS, settings.redis_options)
@@ -101,6 +115,7 @@ get '/:leaderboard/:handle' do
   add_member_data(lb, member).to_json
 end
 
+# gets members around a specific member
 get '/:leaderboard/:handle/around' do
   content_type :json
   lb = Leaderboard.new(params[:leaderboard], DEFAULT_OPTIONS, settings.redis_options)
@@ -109,6 +124,7 @@ get '/:leaderboard/:handle/around' do
   leaders.to_json    
 end
 
+# not sure what this does?
 put '/:leaderboard' do
   content_type :json
   lb = Leaderboard.new(params[:leaderboard], DEFAULT_OPTIONS, settings.redis_options)
