@@ -27,6 +27,7 @@ end
 
 # return a specific leaderboard with scores
 get '/:leaderboard' do
+  response['Access-Control-Allow-Origin'] = '*'
   content_type :json
   page = params[:page] || 1
   lb = Leaderboard.new(params[:leaderboard], DEFAULT_OPTIONS, settings.redis_options)
@@ -52,6 +53,7 @@ end
 
 # get some basic info about a leaderboard
 get '/:leaderboard/about' do
+  response['Access-Control-Allow-Origin'] = '*'
   content_type :json
   lb = Leaderboard.new(params[:leaderboard], DEFAULT_OPTIONS, settings.redis_options)
   {:name => params[:leaderboard], 
@@ -81,6 +83,7 @@ end
 
 # gets a the member in a specific rank for a leaderboard
 get '/:leaderboard/rank/:rank' do
+  response['Access-Control-Allow-Origin'] = '*'
   content_type :json
   lb = Leaderboard.new(params[:leaderboard], DEFAULT_OPTIONS, settings.redis_options)
   add_member_data(lb, lb.member_at(params[:rank].to_i)).to_json
@@ -89,6 +92,7 @@ end
 # gets a range of ranks for a leaderboard
 get '/:leaderboard/rank_range' do
   content_type :json
+  response['Access-Control-Allow-Origin'] = '*'
   lb = Leaderboard.new(params[:leaderboard], DEFAULT_OPTIONS, settings.redis_options)
   leaders = lb.members_from_rank_range(params[:start].to_i, params[:end].to_i)
   leaders.each { |member| add_member_data(lb, member) }
@@ -97,6 +101,7 @@ end
 
 # returns members and their ranks from comma separated list of member
 get '/:leaderboard/rank_members' do
+  response['Access-Control-Allow-Origin'] = '*'
   content_type :json
   lb = Leaderboard.new(params[:leaderboard], DEFAULT_OPTIONS, settings.redis_options)
   leaders = lb.ranked_in_list(params[:members].split(','))
@@ -106,6 +111,7 @@ end
 
 # gets a member's rank
 get '/:leaderboard/:handle' do
+  response['Access-Control-Allow-Origin'] = '*'
   content_type :json
   lb = Leaderboard.new(params[:leaderboard], DEFAULT_OPTIONS, settings.redis_options)
   member = {:handle => params[:handle], 
@@ -117,6 +123,7 @@ end
 
 # gets members around a specific member
 get '/:leaderboard/:handle/around' do
+  response['Access-Control-Allow-Origin'] = '*'
   content_type :json
   lb = Leaderboard.new(params[:leaderboard], DEFAULT_OPTIONS, settings.redis_options)
   leaders = lb.around_me(params[:handle])
