@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>[topcoder] Leaderboard</title>
+
+    <!-- Bootstrap -->
+    <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+      <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+    <div class="container">
+
+      <h1>Upload a spredsheet for the '<%= params[:leaderboard] %>' Leaderboard</h1>
+
+      <p>The upload process expects a CSV file with the following columns:</p>
+
+      <ol>
+      <li>utm_source - the handle of the member who referred the new member</li>
+      <li>pic - the full URL of the profile picture for the member in the utm_source</li>
+      </ol>
+
+      <p style="margin-bottom:50px">When you import the CSV, it will remove all of the current leaderboard rankings and replace them with the
+      contents from the spreadsheet. Each row in the spreadsheet will increment the member in the utm_source by 1.</p>
+
+      <form action="/<%= params[:leaderboard] %>/upload" method="post" enctype="multipart/form-data" role="form">
+        <div class="form-group">
+          <label for="csv">CSV File</label>
+          <input type="file" id="csv" name="csv">
+        </div>        
+        <div class="form-group">
+          <label for="csv">API Key</label>
+          <input type="input" class="form-control" style="width:250px" id="apikey" name="apikey" placeholder="Enter the requred api key">
+        </div>
+        <button type="submit" class="btn btn-default">Upload</button>
+      </form>
+
+    </div>
+
+  </body>
+</html>

@@ -1,6 +1,7 @@
 require 'sinatra'
 require 'json'
 require 'leaderboard'
+require 'csv'
 
 configure do
   set :redis_options, {:host => 'localhost', :port => 6379}
@@ -60,6 +61,29 @@ get '/:leaderboard/about' do
     :members => lb.total_members,
     :pages => lb.total_pages
     }.to_json
+end
+
+# shows a form to upload a spreadsheet of records
+get '/:leaderboard/upload' do
+  erb :upload
+end
+
+post '/:leaderboard/upload' do
+  lb = Leaderboard.new(params[:leaderboard], DEFAULT_OPTIONS, settings.redis_options)
+  if ENV['APIKEY'].eql?(params[:apikey])  
+    # whipe out the current leaderboard
+    lb.delete_leaderboard
+    file_data = params['csv'][:tempfile].read
+    csv_rows  = CSV.parse(file_data, headers: true, header_converters: :symbol)
+    csv_rows.each do |row| 
+      score = 1
+      score = score + lb.score_for(row[:utm_source]).to_i if lb.score_for(row[:utm_source])
+      lb.rank_member(row[:utm_source], score, JSON.generate({'pic' => row[:pic]}))
+    end
+    {:status => 'success', :message => "Imported #{csv_rows.size} rows from the uploaded spreadsheet and recalculated leaderbaord standings."}.to_json
+  else
+    {:status => "error", :message => "API Key did not match. Score not recorded."}.to_json
+  end    
 end
 
 # shows a form to manually enter a member's score
