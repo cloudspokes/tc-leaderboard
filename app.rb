@@ -78,7 +78,7 @@ post '/:leaderboard/upload' do
     csv_rows.each do |row| 
       score = 1
       score = score + lb.score_for(row[:utm_source]).to_i if lb.score_for(row[:utm_source])
-      lb.rank_member(row[:utm_source], score, JSON.generate({'pic' => row[:pic]}))
+      #lb.rank_member(row[:utm_source], score, JSON.generate({'pic' => row[:pic]}))
     end
     {:status => 'success', :message => "Imported #{csv_rows.size} rows from the uploaded spreadsheet and recalculated leaderbaord standings."}.to_json
   else
