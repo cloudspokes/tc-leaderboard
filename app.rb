@@ -32,9 +32,9 @@ get '/:leaderboard' do
   content_type :json
   lb = Leaderboard.new(params[:leaderboard], DEFAULT_OPTIONS, settings.redis_options)
   # return the specified page of leaders
-  page = params[:page] || 1
+  page = params[:page].to_i || 1
   # return the specified number of results
-  lb.page_size = params[:page_size] if params[:page_size]
+  lb.page_size = params[:page_size].to_i if params[:page_size]
   leaders = lb.leaders(page)
   # add in any additional data
   leaders.each { |member| add_member_data(lb, member) }
