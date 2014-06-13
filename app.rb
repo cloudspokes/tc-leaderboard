@@ -41,15 +41,21 @@ get '/:leaderboard' do
   leaders.to_json
 end
 
-# adds/updates a member's score for the specified leaderboard
+# sets a member's score for the specified leaderboard
 post '/:leaderboard' do
   lb = Leaderboard.new(params[:leaderboard], DEFAULT_OPTIONS, settings.redis_options)
   if ENV['APIKEY'].eql?(params[:apikey])
-    score = params[:score].to_i
-    # if they already exist, add their new score to their current
-    score = score + lb.score_for(params[:handle]).to_i if lb.score_for(params[:handle])
-    lb.rank_member(params[:handle], score, JSON.generate({'pic' => params[:pic]}))
-    {:status => "success", :message => "Added/Updated #{params[:handle]} to a score of #{score}"}.to_json
+    set_member_score(lb, params[:handle], params[:score].to_i, JSON.generate({'pic' => params[:pic]}))
+  else
+    {:status => "error", :message => "API Key did not match. Score not recorded."}.to_json
+  end
+end
+
+# adds score to a member's existing score for the specified leaderboard. 
+put '/:leaderboard' do
+  lb = Leaderboard.new(params[:leaderboard], DEFAULT_OPTIONS, settings.redis_options)
+  if ENV['APIKEY'].eql?(params[:apikey])
+    increment_member_score(lb, params[:handle], params[:score].to_i, JSON.generate({'pic' => params[:pic]}))
   else
     {:status => "error", :message => "API Key did not match. Score not recorded."}.to_json
   end
@@ -79,9 +85,8 @@ post '/:leaderboard/upload' do
     file_data = params['csv'][:tempfile].read
     csv_rows  = CSV.parse(file_data, headers: true, header_converters: :symbol)
     csv_rows.each do |row| 
-      score = 1
-      score = score + lb.score_for(row[:referring_member_handle]).to_i if lb.score_for(row[:referring_member_handle])
-      lb.rank_member(row[:referring_member_handle], score, JSON.generate({'pic' => row[:referring_member_picture]}))
+      # increment the score by 1 for each row in the spreadsheet
+      increment_member_score(lb, row[:referring_member_handle], 1, JSON.generate({'pic' => params[:referring_member_picture]}))
     end
     {:status => 'success', :message => "Imported #{csv_rows.size} rows from the uploaded spreadsheet and recalculated leaderbaord standings."}.to_json
   else
@@ -98,11 +103,7 @@ end
 post '/:leaderboard/form' do
   lb = Leaderboard.new(params[:leaderboard], DEFAULT_OPTIONS, settings.redis_options)
   if ENV['APIKEY'].eql?(params[:apikey])
-    score = params[:score].to_i
-    # if they already exist, add their new score to their current
-    score = score + lb.score_for(params[:handle]).to_i if lb.score_for(params[:handle])
-    lb.rank_member(params[:handle], score, JSON.generate({'pic' => params[:pic]}))
-    {:status => "success", :message => "Added/Updated #{params[:handle]} to a score of #{score}"}.to_json
+    set_member_score(lb, params[:handle], params[:score].to_i, JSON.generate({'pic' => params[:pic]}))
   else
     {:status => "error", :message => "API Key did not match. Score not recorded."}.to_json
   end
@@ -182,4 +183,23 @@ def add_member_data(lb, member)
     # fail silently if no data exists
   end
   member
+end
+
+# sets a members' score to a specific value
+def set_member_score(lb, handle, score, json)
+  lb.rank_member(handle, score, json)
+  {:status => "success", :message => "Set score for #{handle} to #{score}."}.to_json
+rescue Exception => e
+  {:status => "error", :message => e.message}.to_json
+end
+
+# increments a member's existing score by score
+def increment_member_score(lb, handle, score, json)
+  increment_by = score
+  # if they already exist, add their new score to their current
+  score = score + lb.score_for(handle).to_i if lb.score_for(handle)
+  lb.rank_member(handle, score, json)
+  {:status => "success", :message => "Added #{increment_by} to #{handle} for a current score of #{score}."}.to_json  
+rescue Exception => e
+  {:status => "error", :message => e.message}.to_json
 end
