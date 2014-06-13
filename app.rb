@@ -2,6 +2,8 @@ require 'sinatra'
 require 'json'
 require 'leaderboard'
 require 'csv'
+require 'httparty'
+require 'uri'
 
 configure do
   set :redis_options, {:host => 'localhost', :port => 6379}
@@ -45,7 +47,7 @@ end
 post '/:leaderboard' do
   lb = Leaderboard.new(params[:leaderboard], DEFAULT_OPTIONS, settings.redis_options)
   if ENV['APIKEY'].eql?(params[:apikey])
-    set_member_score(lb, params[:handle], params[:score].to_i, JSON.generate({'pic' => params[:pic]}))
+    set_member_score(lb, params[:handle], params[:score].to_i, JSON.generate({'pic' => process_pic(params[:handle], params[:pic])}))
   else
     {:status => "error", :message => "API Key did not match. Score not recorded."}.to_json
   end
@@ -55,7 +57,7 @@ end
 put '/:leaderboard' do
   lb = Leaderboard.new(params[:leaderboard], DEFAULT_OPTIONS, settings.redis_options)
   if ENV['APIKEY'].eql?(params[:apikey])
-    increment_member_score(lb, params[:handle], params[:score].to_i, JSON.generate({'pic' => params[:pic]}))
+    increment_member_score(lb, params[:handle], params[:score].to_i, JSON.generate({'pic' => process_pic(params[:handle], params[:pic])}))
   else
     {:status => "error", :message => "API Key did not match. Score not recorded."}.to_json
   end
@@ -80,13 +82,20 @@ end
 post '/:leaderboard/upload' do
   lb = Leaderboard.new(params[:leaderboard], DEFAULT_OPTIONS, settings.redis_options)
   if ENV['APIKEY'].eql?(params[:apikey])  
+    pics = {}
     # whipe out the current leaderboard
     lb.delete_leaderboard
     file_data = params['csv'][:tempfile].read
     csv_rows  = CSV.parse(file_data, headers: true, header_converters: :symbol)
     csv_rows.each do |row| 
-      # increment the score by 1 for each row in the spreadsheet
-      increment_member_score(lb, row[:referring_member_handle], 1, JSON.generate({'pic' => params[:referring_member_picture]}))
+      if row[:referring_member_handle]
+        # if the member's image url doesn't exist in the hash, go get it and add to hash
+        if !pics.key? row[:referring_member_handle]
+          pics[row[:referring_member_handle]] = process_pic(row[:referring_member_handle], row[:referring_member_picture])
+        end
+        # increment the score by 1 for each row in the spreadsheet
+        increment_member_score(lb, row[:referring_member_handle], 1, JSON.generate({'pic' => pics[row[:referring_member_handle]]}))
+      end
     end
     {:status => 'success', :message => "Imported #{csv_rows.size} rows from the uploaded spreadsheet and recalculated leaderbaord standings."}.to_json
   else
@@ -103,7 +112,7 @@ end
 post '/:leaderboard/form' do
   lb = Leaderboard.new(params[:leaderboard], DEFAULT_OPTIONS, settings.redis_options)
   if ENV['APIKEY'].eql?(params[:apikey])
-    set_member_score(lb, params[:handle], params[:score].to_i, JSON.generate({'pic' => params[:pic]}))
+    set_member_score(lb, params[:handle], params[:score].to_i, JSON.generate({'pic' => process_pic(params[:handle], params[:pic])}))
   else
     {:status => "error", :message => "API Key did not match. Score not recorded."}.to_json
   end
@@ -172,6 +181,21 @@ end
 
 not_found do
   halt 404, 'page not found'
+end
+
+# if the submitted pic url is blank, calls the tc api to fetch image
+def process_pic(handle, pic)
+  # if the passed pic is blank or empty, then call the tc api
+  if !pic || pic.empty?
+    response = HTTParty.get("http://api.topcoder.com/v2/users/#{URI.escape(handle)}")
+    # if we got 404 or their profile pic is also blank, default one in
+    if response.code == 404 || response['photoLink'].empty?
+      pic = 'http://3a72mb4dqcfnkgfimp04jgyyd.wpengine.netdna-cdn.com/wp-content/themes/tcs-responsive/i/default-photo.png'
+    else
+      pic = "http://community.topcoder.com#{response['photoLink']}"
+    end
+  end
+  pic
 end
 
 # add any additional member data (ie pic)
