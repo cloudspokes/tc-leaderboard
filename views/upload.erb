@@ -21,12 +21,12 @@
       <p>The upload process expects a CSV file with the following columns:</p>
 
       <ol>
-      <li>utm_source - the handle of the member who referred the new member</li>
-      <li>pic - the full URL of the profile picture for the member in the utm_source</li>
+      <li>referring_member_handle - the handle of the member who referred the new member</li>
+      <li>referring_member_picture - the full URL of the profile picture for the member in the referring_member_handle</li>
       </ol>
 
       <p style="margin-bottom:50px">When you import the CSV, it will remove all of the current leaderboard rankings and replace them with the
-      contents from the spreadsheet. Each row in the spreadsheet will increment the member in the utm_source by 1.</p>
+      contents from the spreadsheet. Each row in the spreadsheet will increment the member in the referring_member_handle by 1.</p>
 
       <form action="/<%= params[:leaderboard] %>/upload" method="post" enctype="multipart/form-data" role="form">
         <div class="form-group">

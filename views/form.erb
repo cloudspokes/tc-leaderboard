@@ -1,9 +1,51 @@
-<h1>Add/Update Member to Leaderboard '<%= params[:leaderboard] %>'</h1>
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>[topcoder] Leaderboard</title>
 
-<form action="/<%= params[:leaderboard] %>/form" method="post">
-  Handle: <input type="text" name="handle"><br/>
-  Score: <input type="text" name="score"><br/>
-  Pic URL: <input type="text" name="pic"><br/>
-  API Key: <input type="text" name="apikey"><br/>
-  <input type="submit">
-</form>
+    <!-- Bootstrap -->
+    <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+      <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+    <div class="container">
+
+      <h1>Add a member's score to the '<%= params[:leaderboard] %>' leaderboard</h1>
+
+      <p>If the member already exists on the leaderboard their score will be overwritten with the score you provide below.</p>      
+
+      <form action="/<%= params[:leaderboard] %>/form" method="post" role="form">
+
+        <div class="form-group">
+          <label for="handle">Handle</label>
+          <input type="input" class="form-control" style="width:250px" id="handle" name="handle">
+        </div>    
+
+        <div class="form-group">
+          <label for="score">Score</label>
+          <input type="input" class="form-control" style="width:250px" id="score" name="score">
+        </div>    
+
+        <div class="form-group">
+          <label for="pic">Pic URL</label>
+          <input type="input" class="form-control" style="width:750px" id="pic" name="pic" placeholder="The complete URL for their image.">
+        </div>            
+
+        <div class="form-group">
+          <label for="apikey">API Key</label>
+          <input type="input" class="form-control" style="width:250px" id="apikey" name="apikey" placeholder="Enter the required api key">
+        </div>            
+
+        <button type="submit" class="btn btn-default">Submit</button>
+      </form>
+
+    </div>
+
+  </body>
+</html>      
