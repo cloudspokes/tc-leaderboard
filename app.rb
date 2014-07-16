@@ -227,3 +227,12 @@ def increment_member_score(lb, handle, score, json)
 rescue Exception => e
   {:status => "error", :message => e.message}.to_json
 end
+
+def delete_all_members(leaderboard)
+  lb = Leaderboard.new(leaderboard, DEFAULT_OPTIONS, settings.redis_options)
+  p "Removing all members from leaderbaord '#{lb.leaderboard_name}'"
+  lb.all_leaders.each do |entry|
+    p "Removing #{entry[:handle]}"
+    lb.remove_member(entry[:handle])
+  end
+end
