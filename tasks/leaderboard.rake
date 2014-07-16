@@ -2,7 +2,7 @@ desc "Updates the IDOLOnDemand Leaderboard"
 task :idolondemand do
   search_url = 'http://tc-search.herokuapp.com/challenges/search?q=challengeName:IDOL%20+currentStatus%3ACompleted'
   skip_challenges = [30042560, 30043102]
-  update_leaderboard('autoupdate', search_url, skip_challenges)
+  update_leaderboard('idolondemand', search_url, skip_challenges)
 end
 
 def update_leaderboard(leaderboard, search_url, skip)
@@ -40,7 +40,7 @@ def update_leaderboard(leaderboard, search_url, skip)
     end
 
     p "Processing -- #{challenges['_source']['challengeName']} #{challenges['_source']['challengeId']}"
-
+    p winners
     winners.each do |w|
       increment_member_score(
         lb, 
