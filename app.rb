@@ -70,7 +70,8 @@ get '/:leaderboard/about' do
   lb = Leaderboard.new(params[:leaderboard], DEFAULT_OPTIONS, settings.redis_options)
   {:name => params[:leaderboard], 
     :members => lb.total_members,
-    :pages => lb.total_pages
+    :pages => lb.total_pages,
+    :total => lb.total_members_in_score_range(1,1)
     }.to_json
 end
 
