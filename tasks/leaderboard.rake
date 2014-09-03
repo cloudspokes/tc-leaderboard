@@ -1,6 +1,6 @@
 desc "Updates the IDOLOnDemand Leaderboard"
 task :idolondemand do
-  search_url = 'http://tc-search.herokuapp.com/challenges/search?q=challengeName:IDOL%20+currentStatus%3ACompleted'
+  search_url = 'http://tc-search.herokuapp.com/challenges/v2/search?q=platforms:HP%20IDOL%20OnDemand%20AND%20status:Completed'
   skip_challenges = [30042560, 30043102]
   update_leaderboard('idolondemand', search_url, skip_challenges)
 end
@@ -34,9 +34,13 @@ def update_leaderboard(leaderboard, search_url, skip)
       winners << s if s['finalScore'] > 80 && x < challenge['prize'].count      
     end
 
-    # add the money they won to the points
-    challenge['prize'][0..winners.count-1].each_with_index  do |prize, x|
-      winners[x]['points'] = prize
+    begin
+      # add the money they won to the points
+      challenge['prize'][0..winners.count-1].each_with_index  do |prize, x|
+        winners[x]['points'] = prize
+      end
+    rescue
+      p " **** Could not calcualte points for winners. "
     end
 
     p "Processing -- #{challenges['_source']['challengeName']} #{challenges['_source']['challengeId']}"
