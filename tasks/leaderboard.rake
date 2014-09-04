@@ -1,6 +1,6 @@
 desc "Updates the IDOLOnDemand Leaderboard"
 task :idolondemand do
-  search_url = 'http://tc-search.herokuapp.com/challenges/v2/search?q=platforms:HP%20IDOL%20OnDemand%20AND%20status:Completed'
+  search_url = 'http://tc-search.herokuapp.com/challenges/v2/search?q=challengeName:IDOL%20AND%20status:Completed'
   skip_challenges = [30042560, 30043102]
   update_leaderboard('idolondemand', search_url, skip_challenges)
 end
