@@ -118,11 +118,11 @@ def update_swift_leaderboard
     csv_rows  = CSV.parse(file_data, headers: true, header_converters: :symbol)
     csv_rows.each do |row| 
       if row[:handle]
+        next if lb.score_for(row[:handle]) == 1.0 # if they already have a score of 1 don't update
         # if the member's image url doesn't exist in the hash, go get it and add to hash
         if !pics.key? row[:handle]
           pics[row[:handle]] = process_pic(row[:handle], row[:handle])
         end
-        # increment the score by 1 for each row in the spreadsheet
         set_member_score(lb, row[:handle], row[:passed], JSON.generate({'pic' => pics[row[:handle]]}))
       end
     end
