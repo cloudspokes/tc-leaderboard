@@ -5,6 +5,18 @@ task :idolondemand do
   update_leaderboard('idolondemand', search_url, skip_challenges)
 end
 
+task :getswifter do
+  search_url = 'http://tc-search.herokuapp.com/challenges/v2/search?q=technologies:Swift%20AND%20status:Completed%20AND%20-challengeName:algorithm'
+  skip_challenges = [30043437, 30043317, 30043422, 30043411, 30043297, 30043425, 30043293, 30044358, 30044401]
+  update_leaderboard('getswifter', search_url, skip_challenges)
+end
+
+task :getswifteralgos do
+  search_url = 'http://tc-search.herokuapp.com/challenges/v2/search?q=technologies:Swift%20AND%20status:Completed%20AND%20challengeName:algorithm'
+  skip_challenges = []
+  update_leaderboard('getswifteralgos', search_url, skip_challenges)
+end
+
 def update_leaderboard(leaderboard, search_url, skip)
 
   # delete all current members
@@ -31,7 +43,7 @@ def update_leaderboard(leaderboard, search_url, skip)
 
     # see how many winners there are
     submitters.each_with_index do |s, x|
-      winners << s if s['finalScore'] > 80 && x < challenge['prize'].count      
+      winners << s if s['finalScore'] > 80 && x < challenge['prize'].count
     end
 
     begin
@@ -47,9 +59,9 @@ def update_leaderboard(leaderboard, search_url, skip)
     p winners
     winners.each do |w|
       increment_member_score(
-        lb, 
-        w['handle'], 
-        w['points'].to_i, 
+        lb,
+        w['handle'],
+        w['points'].to_i,
         JSON.generate({'pic' => process_pic(w['handle'], nil)})
       )
     end
