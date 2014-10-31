@@ -1,4 +1,11 @@
 desc "Updates the IDOLOnDemand Leaderboard"
+
+task :lightning do
+  search_url = 'http://tc-search.herokuapp.com/challenges/v2/search?q=technologies:lightning%20AND%20status:Completed'
+  skip_challenges = []
+  update_leaderboard('lightning', search_url, skip_challenges)
+end
+
 task :idolondemand do
   search_url = 'http://tc-search.herokuapp.com/challenges/v2/search?q=challengeName:IDOL%20AND%20status:Completed'
   skip_challenges = [30042560, 30043102]
