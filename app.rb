@@ -26,7 +26,7 @@ end
 
 get '/' do
   'Welcome to the topcoder leaderboards. Choose a leaderboard to get started.'
-end 
+end
 
 # return a specific leaderboard with scores
 get '/:leaderboard' do
@@ -53,7 +53,7 @@ post '/:leaderboard' do
   end
 end
 
-# adds score to a member's existing score for the specified leaderboard. 
+# adds score to a member's existing score for the specified leaderboard.
 put '/:leaderboard' do
   lb = Leaderboard.new(params[:leaderboard], DEFAULT_OPTIONS, settings.redis_options)
   if ENV['APIKEY'].eql?(params[:apikey])
@@ -68,7 +68,7 @@ get '/:leaderboard/about' do
   response['Access-Control-Allow-Origin'] = '*'
   content_type :json
   lb = Leaderboard.new(params[:leaderboard], DEFAULT_OPTIONS, settings.redis_options)
-  {:name => params[:leaderboard], 
+  {:name => params[:leaderboard],
     :members => lb.total_members,
     :pages => lb.total_pages,
     :total => lb.total_members_in_score_range(1,1)
@@ -85,13 +85,13 @@ post '/:leaderboard/upload' do
     update_swift_leaderboard
   else
     lb = Leaderboard.new(params[:leaderboard], DEFAULT_OPTIONS, settings.redis_options)
-    if ENV['APIKEY'].eql?(params[:apikey])  
+    if ENV['APIKEY'].eql?(params[:apikey])
       pics = {}
       # whipe out the current leaderboard
       lb.delete_leaderboard
       file_data = params['csv'][:tempfile].read
       csv_rows  = CSV.parse(file_data, headers: true, header_converters: :symbol)
-      csv_rows.each do |row| 
+      csv_rows.each do |row|
         if row[:referring_member_handle]
           # if the member's image url doesn't exist in the hash, go get it and add to hash
           if !pics.key? row[:referring_member_handle]
@@ -104,19 +104,19 @@ post '/:leaderboard/upload' do
       {:status => 'success', :message => "Imported #{csv_rows.size} rows from the uploaded spreadsheet and recalculated leaderbaord standings."}.to_json
     else
       {:status => "error", :message => "API Key did not match. Score not recorded."}.to_json
-    end 
-  end   
+    end
+  end
 end
 
 def update_swift_leaderboard
   lb = Leaderboard.new(params[:leaderboard], DEFAULT_OPTIONS, settings.redis_options)
-  if ENV['APIKEY'].eql?(params[:apikey])  
+  if ENV['APIKEY'].eql?(params[:apikey])
     pics = {}
     # whipe out the current leaderboard
     lb.delete_leaderboard
     file_data = params['csv'][:tempfile].read
     csv_rows  = CSV.parse(file_data, headers: true, header_converters: :symbol)
-    csv_rows.each do |row| 
+    csv_rows.each do |row|
       if row[:handle]
         next if lb.score_for(row[:handle]) == 1.0 # if they already have a score of 1 don't update
         # if the member's image url doesn't exist in the hash, go get it and add to hash
@@ -129,7 +129,7 @@ def update_swift_leaderboard
     {:status => 'success', :message => "Imported #{csv_rows.size} rows from the uploaded spreadsheet."}.to_json
   else
     {:status => "error", :message => "API Key did not match. Score not recorded."}.to_json
-  end 
+  end
 end
 
 # shows a form to manually enter a member's score
@@ -172,7 +172,7 @@ get '/:leaderboard/rank_members' do
   lb = Leaderboard.new(params[:leaderboard], DEFAULT_OPTIONS, settings.redis_options)
   leaders = lb.ranked_in_list(params[:members].split(','))
   leaders.each { |member| add_member_data(lb, member) }
-  leaders.to_json  
+  leaders.to_json
 end
 
 # gets a member's rank
@@ -180,7 +180,7 @@ get '/:leaderboard/:handle' do
   response['Access-Control-Allow-Origin'] = '*'
   content_type :json
   lb = Leaderboard.new(params[:leaderboard], DEFAULT_OPTIONS, settings.redis_options)
-  member = {:handle => params[:handle], 
+  member = {:handle => params[:handle],
     :rank => lb.rank_for(params[:handle]),
     :score => lb.score_for(params[:handle])
     }
@@ -194,7 +194,7 @@ get '/:leaderboard/:handle/around' do
   lb = Leaderboard.new(params[:leaderboard], DEFAULT_OPTIONS, settings.redis_options)
   leaders = lb.around_me(params[:handle])
   leaders.each { |member| add_member_data(lb, member) }
-  leaders.to_json    
+  leaders.to_json
 end
 
 # not sure what this does?
@@ -202,7 +202,7 @@ put '/:leaderboard' do
   content_type :json
   lb = Leaderboard.new(params[:leaderboard], DEFAULT_OPTIONS, settings.redis_options)
   lb.rank_member(params[:handle], params[:score])
-  {:handle => params[:handle], 
+  {:handle => params[:handle],
     :rank => lb.rank_for(params[:handle]),
     :score => lb.score_for(params[:handle])
     }.to_json
@@ -219,7 +219,7 @@ def process_pic(handle, pic)
     response = HTTParty.get("http://api.topcoder.com/v2/users/#{URI.escape(handle)}")
     # if we got 404 or their profile pic is also blank, default one in
     if response.code == 404 || response['photoLink'].empty?
-      pic = 'http://3a72mb4dqcfnkgfimp04jgyyd.wpengine.netdna-cdn.com/wp-content/themes/tcs-responsive/i/default-photo.png'
+      pic = 'http://www.topcoder.com/wp-content/themes/tcs-responsive/i/default-photo.png'
     else
       pic = "http://community.topcoder.com#{response['photoLink']}"
     end
@@ -232,7 +232,7 @@ def add_member_data(lb, member)
   begin
     obj = JSON.parse(lb.member_data_for(member[:handle]))
     obj.each { |key, value| member[key] = value }
-  rescue 
+  rescue
     # fail silently if no data exists
   end
   member
@@ -252,7 +252,7 @@ def increment_member_score(lb, handle, score, json)
   # if they already exist, add their new score to their current
   score = score + lb.score_for(handle).to_i if lb.score_for(handle)
   lb.rank_member(handle, score, json)
-  {:status => "success", :message => "Added #{increment_by} to #{handle} for a current score of #{score}."}.to_json  
+  {:status => "success", :message => "Added #{increment_by} to #{handle} for a current score of #{score}."}.to_json
 rescue Exception => e
   {:status => "error", :message => e.message}.to_json
 end
