@@ -220,6 +220,8 @@ def process_pic(handle, pic)
     # if we got 404 or their profile pic is also blank, default one in
     if response.code == 404 || response['photoLink'].empty?
       pic = 'http://www.topcoder.com/wp-content/themes/tcs-responsive/i/default-photo.png'
+    elsif response['photoLink'].starts_with('http://')
+      pic = response['photoLink']
     else
       pic = "http://community.topcoder.com#{response['photoLink']}"
     end
