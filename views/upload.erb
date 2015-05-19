@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>[topcoder] Leaderboard</title>
+    <title>Topcoder Leaderboard</title>
 
     <!-- Bootstrap -->
     <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
@@ -18,21 +18,22 @@
 
       <h1>Upload a spredsheet for the '<%= params[:leaderboard] %>' Leaderboard</h1>
 
-      <p>The upload process expects a CSV file with the following columns:</p>
+      <p>The upload process expects a CSV file with the following columns. The first row
+        must be the column names. There can be additional rows and they will be simply ignored.</p>
 
       <ol>
-      <li>referring_member_handle - the handle of the member who referred the new member</li>
-      <li>referring_member_picture - the full URL of the profile picture for the member in the referring_member_handle</li>
+      <li>handle - the handle of the member</li>
+      <li>points - the total number of points for the member.</li>
       </ol>
 
       <p style="margin-bottom:50px">When you import the CSV, it will remove all of the current leaderboard rankings and replace them with the
-      contents from the spreadsheet. Each row in the spreadsheet will increment the member in the referring_member_handle by 1.</p>
+      values from the spreadsheet.</p>
 
       <form action="/<%= params[:leaderboard] %>/upload" method="post" enctype="multipart/form-data" role="form">
         <div class="form-group">
           <label for="csv">CSV File</label>
           <input type="file" id="csv" name="csv">
-        </div>        
+        </div>
         <div class="form-group">
           <label for="csv">API Key</label>
           <input type="input" class="form-control" style="width:250px" id="apikey" name="apikey" placeholder="Enter the required api key">

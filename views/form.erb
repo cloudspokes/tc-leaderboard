@@ -16,31 +16,31 @@
   <body>
     <div class="container">
 
-      <h1>Add a member's score to the '<%= params[:leaderboard] %>' leaderboard</h1>
+      <h1>Add or update a member's score for the '<%= params[:leaderboard] %>' leaderboard</h1>
 
-      <p>If the member already exists on the leaderboard their score will be overwritten with the score you provide below.</p>      
+      <p>If the member already exists on the leaderboard their score will be overwritten with the score you provide below.</p>
 
       <form action="/<%= params[:leaderboard] %>/form" method="post" role="form">
 
         <div class="form-group">
           <label for="handle">Handle</label>
           <input type="input" class="form-control" style="width:250px" id="handle" name="handle">
-        </div>    
+        </div>
 
         <div class="form-group">
           <label for="score">Score</label>
           <input type="input" class="form-control" style="width:250px" id="score" name="score">
-        </div>    
+        </div>
 
         <div class="form-group">
           <label for="pic">Pic URL</label>
-          <input type="input" class="form-control" style="width:750px" id="pic" name="pic" placeholder="The complete URL for their image.">
-        </div>            
+          <input type="input" class="form-control" style="width:750px" id="pic" name="pic" placeholder="Optional -- The complete URL for their image.">
+        </div>
 
         <div class="form-group">
           <label for="apikey">API Key</label>
           <input type="input" class="form-control" style="width:250px" id="apikey" name="apikey" placeholder="Enter the required api key">
-        </div>            
+        </div>
 
         <button type="submit" class="btn btn-default">Submit</button>
       </form>
@@ -48,4 +48,4 @@
     </div>
 
   </body>
-</html>      
+</html>

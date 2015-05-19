@@ -81,34 +81,6 @@ get '/:leaderboard/upload' do
 end
 
 post '/:leaderboard/upload' do
-  if params[:leaderboard] == 'learnswift'
-    update_swift_leaderboard
-  else
-    lb = Leaderboard.new(params[:leaderboard], DEFAULT_OPTIONS, settings.redis_options)
-    if ENV['APIKEY'].eql?(params[:apikey])
-      pics = {}
-      # whipe out the current leaderboard
-      lb.delete_leaderboard
-      file_data = params['csv'][:tempfile].read
-      csv_rows  = CSV.parse(file_data, headers: true, header_converters: :symbol)
-      csv_rows.each do |row|
-        if row[:referring_member_handle]
-          # if the member's image url doesn't exist in the hash, go get it and add to hash
-          if !pics.key? row[:referring_member_handle]
-            pics[row[:referring_member_handle]] = process_pic(row[:referring_member_handle], row[:referring_member_picture])
-          end
-          # increment the score by 1 for each row in the spreadsheet
-          increment_member_score(lb, row[:referring_member_handle], 1, JSON.generate({'pic' => pics[row[:referring_member_handle]]}))
-        end
-      end
-      {:status => 'success', :message => "Imported #{csv_rows.size} rows from the uploaded spreadsheet and recalculated leaderbaord standings."}.to_json
-    else
-      {:status => "error", :message => "API Key did not match. Score not recorded."}.to_json
-    end
-  end
-end
-
-def update_swift_leaderboard
   lb = Leaderboard.new(params[:leaderboard], DEFAULT_OPTIONS, settings.redis_options)
   if ENV['APIKEY'].eql?(params[:apikey])
     pics = {}
@@ -118,12 +90,7 @@ def update_swift_leaderboard
     csv_rows  = CSV.parse(file_data, headers: true, header_converters: :symbol)
     csv_rows.each do |row|
       if row[:handle]
-        next if lb.score_for(row[:handle]) == 1.0 # if they already have a score of 1 don't update
-        # if the member's image url doesn't exist in the hash, go get it and add to hash
-        if !pics.key? row[:handle]
-          pics[row[:handle]] = process_pic(row[:handle], row[:handle])
-        end
-        set_member_score(lb, row[:handle], row[:passed], JSON.generate({'pic' => pics[row[:handle]]}))
+        set_member_score(lb, row[:handle], row[:points], JSON.generate({'pic' => process_pic(row[:handle], nil)}))
       end
     end
     {:status => 'success', :message => "Imported #{csv_rows.size} rows from the uploaded spreadsheet."}.to_json
