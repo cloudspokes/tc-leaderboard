@@ -1,0 +1,36 @@
+<h1>Topcoder Leaderboards</h1>
+<p class="lead">
+  Welcome to the topcoder leaderboards! This API typically returns JSON but some pages provide
+  a simple UI for working with individual boards. Management operations require an API key.
+</p>
+
+<p>The API supports a number of leaderboard operations such as all scores (naturally), retreiving a specific member
+  for a leaderboard, retreiving a member is a specific position, retreiving a range or specific list
+  of members and much more. See the <a href="https://github.com/cloudspokes/tc-leaderboard">github repo</a>
+  for complete details.</p>
+
+<p>Creating a new leaderboard is <strong>extremely simple</strong>. Whenever you add a score to a
+  non-existent leaderboard, it will be created for you. Simply use the Add/Update or Import links for any leaderboard below
+  and change the URL to the name of the board you want to create. </p>
+
+<table class="table table-striped">
+<thead>
+  <tr>
+    <th>Leaderboard</th>
+    <th></th>
+  </tr>
+</thead>
+<tbody>
+  <% boards.each do |board| %>
+  <tr>
+    <td><%= board.upcase %></td>
+    <td>
+      <a href="/<%= board %>"><i class="fa fa-users"> Scores</i></a>&nbsp;&nbsp;&nbsp;
+      <a href="/<%= board %>/form"><i class="fa fa-user-plus"> Add/Update Score</i></a>&nbsp;&nbsp;&nbsp;
+      <a href="/<%= board %>/upload"><i class="fa fa-cloud-upload"> Import Scores</i></a>&nbsp;&nbsp;&nbsp;
+      <a href="/<%= board %>/about"><i class="fa fa-info"> About</i></a>
+    </td>
+  </tr>
+  <% end %>
+</tbody>
+</table>

@@ -25,7 +25,13 @@ configure do
 end
 
 get '/' do
-  'Welcome to the topcoder leaderboards. Choose a leaderboard to get started.'
+  r = Redis.new(settings.redis_options)
+  leaderboards = []
+  r.keys("*").each do |key|
+    leaderboards.push(key) unless key.include?(':')
+  end
+  # leaderboards.sort!.to_json
+  erb :index, :locals => {:boards => leaderboards}
 end
 
 # return a specific leaderboard with scores
@@ -209,8 +215,13 @@ end
 
 # sets a members' score to a specific value
 def set_member_score(lb, handle, score, json)
-  lb.rank_member(handle, score, json)
-  {:status => "success", :message => "Set score for #{handle} to #{score}."}.to_json
+  if (params[:score].to_i == -1)
+    lb.remove_member(handle)
+    {:status => 'success', :message => "#{params[:handle]} removed from the #{params[:leaderboard]} leaderboard."}.to_json
+  else
+    lb.rank_member(handle, score, json)
+    {:status => "success", :message => "Set score for #{handle} to #{score}."}.to_json
+  end
 rescue Exception => e
   {:status => "error", :message => e.message}.to_json
 end

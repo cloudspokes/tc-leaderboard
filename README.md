@@ -2,7 +2,7 @@
 
 Simple leaderboard API that wraps around the [leaderboard gem](https://github.com/agoragames/leaderboard) which uses ruby and reds. This is a simple ruby sinatra app.
 
-Feel free to try these calls out below. The API is loaded with demo data for your enjoyment. In the examples below, the name of the leaderboard is **'demo'**.
+Feel free to try these calls out below. The API is loaded with demo data for your enjoyment. In the examples below, the name of the leaderboard is `demo`.
 
 Unfortunately, there is no way to get a list of all leaderboards.
 
@@ -59,3 +59,5 @@ When you POST scores to a leaderboard, if the member does not exist as a member 
     curl -v -X POST -d handle=jeffdonthemic -d score=80 -d pic=http://community.topcoder.com/i/m/jeffdonthemic.jpeg -d apikey=[API-KEY] http://tc-leaderboard.herokuapp.com/demo
 
 There is also an HTML form you can use to add/update scores. Change the name to your leaderboard, of course, but [here is the sample form](http://tc-leaderboard.herokuapp.com/demo/form) for the demo leaderboard.
+
+To remove a member from a leaderboard, simply update their score with -1.
