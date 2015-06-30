@@ -31,7 +31,7 @@ get '/' do
     leaderboards.push(key) unless key.include?(':')
   end
   # leaderboards.sort!.to_json
-  erb :index, :locals => {:boards => leaderboards}
+  erb :index, :locals => {:boards => leaderboards.sort!}
 end
 
 # return a specific leaderboard with scores
