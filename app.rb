@@ -189,15 +189,21 @@ end
 def process_pic(handle, pic)
   # if the passed pic is blank or empty, then call the tc api
   if !pic || pic.empty?
-    response = HTTParty.get("http://api.topcoder.com/v2/users/#{URI.escape(handle)}")
-    # if we got 404 or their profile pic is also blank, default one in
-    if response.code == 404 || response['photoLink'].empty?
+    begin
+      response = HTTParty.get("http://api.topcoder.com/v2/users/#{URI.escape(handle)}")
+      # if we got 404 or their profile pic is also blank, default one in
+      if response.code == 404 || response['photoLink'].empty?
+        pic = 'http://www.topcoder.com/wp-content/themes/tcs-responsive/i/default-photo.png'
+      elsif response['photoLink'].start_with?('http://')
+        pic = response['photoLink']
+      else
+        pic = "http://community.topcoder.com#{response['photoLink']}"
+      end
+    rescue
+      # if the topcoder api just dies a horrible death then use the default pic
       pic = 'http://www.topcoder.com/wp-content/themes/tcs-responsive/i/default-photo.png'
-    elsif response['photoLink'].start_with?('http://')
-      pic = response['photoLink']
-    else
-      pic = "http://community.topcoder.com#{response['photoLink']}"
     end
+
   end
   pic
 end
